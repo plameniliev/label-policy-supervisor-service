@@ -1,0 +1,24 @@
+apiVersion: kctrl.carvel.dev/v1alpha1
+kind: PackageBuild
+metadata:
+  name: label-policy.field.vmware.com
+spec:
+  release:
+  - resource: {}
+  template:
+    spec:
+      app:
+        spec:
+          deploy:
+          - kapp: {}
+          template:
+          - ytt:
+              paths:
+              - config
+          - kbld: {}
+      export:
+      - imgpkgBundle:
+          image: ghcr.io/plameniliev/label-policy-supervisor-service
+          useKbldImagesLock: true
+        includePaths:
+        - config

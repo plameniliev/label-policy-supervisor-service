@@ -1,0 +1,10 @@
+#@ load("@ytt:data", "data")
+
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Config
+sources:
+- image: controller
+  path: ./controller
+destinations:
+- image: controller
+  newImage: #@ data.values.registry_url + "/controller" 
