@@ -1,0 +1,56 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: labelpolicies.field.vmware.com
+spec:
+  group: field.vmware.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                target:
+                  type: object
+                  properties:
+                    group:
+                      type: string
+                    version:
+                      type: string
+                    resource:
+                      type: string
+                    kind:
+                      type: string
+                    name:
+                      type: string
+                    selector:
+                      type: object
+                      properties:
+                        matchLabels:
+                          type: object
+                          additionalProperties:
+                            type: string
+                  required:
+                    - group
+                    - version
+                    - resource
+                    - kind
+                labels:
+                  type: object
+                  additionalProperties:
+                    type: string
+              required:
+                - target
+                - labels
+  scope: Namespaced
+  names:
+    plural: labelpolicies
+    singular: labelpolicy
+    kind: LabelPolicy
+    shortNames:
+      - lp
