@@ -1,0 +1,16 @@
+#@data/values-schema
+---
+registry_url: ghcr.io/plameniliev/label-policy-supervisor-service
+
+resync_period: "60"
+namespace: ""
+
+#! the one item below only defines the element type; the real defaults are set below via
+#! @schema/default since ytt schema requires array examples to have exactly one item.
+#! these defaults also seed the RBAC rules and the controller's own allowlist check.
+#@schema/default [{"group": "vmoperator.vmware.com", "version": "v1alpha5", "resource": "virtualmachines", "kind": "VirtualMachine"}, {"group": "cluster.x-k8s.io", "version": "v1beta2", "resource": "clusters", "kind": "Cluster"}]
+allowed_resources:
+- group: ""
+  version: ""
+  resource: ""
+  kind: ""

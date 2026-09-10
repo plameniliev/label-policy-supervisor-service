@@ -1,0 +1,83 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: labelpolicy-controller
+  namespace: #@ data.values.namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: labelpolicy
+  template:
+    metadata:
+      labels:
+        app: labelpolicy
+    spec:
+      serviceAccountName: labelpolicy
+      containers:
+      - name: controller
+        image: controller
+        cmd: ["./main"]
+        args:
+        - #@ "--resync-period=" + data.values.resync_period
+        #@ for r in data.values.allowed_resources:
+        - #@ "--allowed-target=" + r.group + "/" + r.version + "/" + r.resource + "/" + r.kind
+        #@ end
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: labelpolicy
+  namespace: #@ data.values.namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: labelpolicy
+rules:
+  - apiGroups: ["field.vmware.com"]
+    resources: ["labelpolicies"]
+    verbs: ["get", "list", "watch"]
+  #@ for r in data.values.allowed_resources:
+  - apiGroups: #@ [r.group]
+    resources: #@ [r.resource]
+    verbs: ["get", "list", "watch", "patch"]
+  #@ end
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: labelpolicy
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: labelpolicy
+subjects:
+  - kind: ServiceAccount
+    name: labelpolicy
+    namespace: #@ data.values.namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-labelpolicies-edit
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+rules:
+- apiGroups: ["field.vmware.com"]
+  resources: ["labelpolicies"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aggregate-labelpolicies-view
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+- apiGroups: ["field.vmware.com"]
+  resources: ["labelpolicies"]
+  verbs: ["get", "list", "watch"]
